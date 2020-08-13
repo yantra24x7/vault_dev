@@ -1,0 +1,1 @@
+add_column :table_name, :column_name, :string -- to add column to existing table

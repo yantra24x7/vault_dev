@@ -1,0 +1,29 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  date: 2019-03-12
+  shift_no: 1
+  alarm_time: 2019-03-12 16:51:52
+  message: MyString
+  alarm_no: MyString
+  alarm_type: MyString
+  axis_no: MyString
+  category: MyString
+  machine: one
+  shift: one
+  tenant: one
+  operator: one
+
+two:
+  date: 2019-03-12
+  shift_no: 1
+  alarm_time: 2019-03-12 16:51:52
+  message: MyString
+  alarm_no: MyString
+  alarm_type: MyString
+  axis_no: MyString
+  category: MyString
+  machine: two
+  shift: two
+  tenant: two
+  operator: two
