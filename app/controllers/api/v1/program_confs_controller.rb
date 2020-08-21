@@ -141,22 +141,28 @@ class ProgramConfsController < ApplicationController
   end
 
   def file_send_to_cnc
+    f_name = params[:file_name]
     machine = Machine.find(params[:machine_id])
     con = machine.program_conf
     if con.present?
       master_dir = Rails.root.join('../..', "part_program", "#{machine.machine_name.split('/').last}", "Master")
+      slave_dir = Rails.root.join('../..', "part_program", "#{machine.machine_name.split('/').last}", "Slave")
       if Dir.exist?(master_dir)
         master_file_list = Dir.foreach(master_dir).select{|x| File.file?("#{master_dir}/#{x}")}
       
         if master_file_list.include?(params[:file_name])
           mac_ip = machine.machine_ip
           
-          dir = "/home/altius/YANTRA"
+          dir = "/home/cnc/vault_dev"
           File.open(File.join(dir, "machine_ip"), 'wb') do |file|
             mac_ip = machine.machine_ip
             file.puts(mac_ip)
           end
-          render json: {status: "FOCUS HERE"}
+             
+          system('gcc -I. upload.c -pthread -lfwlib32 -lstdc++ -o upload')
+	  system("./upload #{master_dir}/#{f_name}")         
+
+          render json: {status: "File upload sucessfully"}
         else
           render json: {status: "File Not Exitst"}
         end
@@ -167,6 +173,45 @@ class ProgramConfsController < ApplicationController
       render json: {status: "Machine Not Registered in File Path"}
     end
   end
+
+
+
+def file_receive_from_cnc
+    f_name = params[:file_name]
+    machine = Machine.find(params[:machine_id])
+    con = machine.program_conf
+    if con.present?
+      master_dir = Rails.root.join('../..', "part_program", "#{machine.machine_name.split('/').last}", "Master")
+      slave_dir = Rails.root.join('../..', "part_program", "#{machine.machine_name.split('/').last}", "Slave")
+      if Dir.exist?(master_dir)
+        master_file_list = Dir.foreach(master_dir).select{|x| File.file?("#{master_dir}/#{x}")}
+      
+        if master_file_list.include?(params[:file_name])
+          mac_ip = machine.machine_ip
+          
+          dir = "/home/cnc/vault_dev"
+          File.open(File.join(dir, "machine_ip"), 'wb') do |file|
+            mac_ip = machine.machine_ip
+            file.puts(mac_ip)
+          end
+            d_file = f_name.split("O").last
+
+	   system('gcc -I. download.c -pthread -lfwlib32 -lstdc++ -o download')
+           system("./download #{slave_dir}/#{f_name} #{d_file}")
+         
+          render json: {status: "File download sucessfully"}
+        else
+          render json: {status: "File Not Exitst"}
+        end
+      else
+        render json: {status: "Folder Not Exitst"}
+      end
+    else
+      render json: {status: "Machine Not Registered in File Path"}
+    end
+  end
+
+
 
   def file_upload
     machine = Machine.find(params[:machine_id])
@@ -310,7 +355,7 @@ class ProgramConfsController < ApplicationController
         slave_dir = Rails.root.join('../..', "part_program", "#{machine.machine_name.split('/').last}", "Slave")
         if Dir.exist?(master_dir) && Dir.exist?(slave_dir)
           master_file_list = Dir.foreach(master_dir).select{|x| File.file?("#{master_dir}/#{x}")}
-          slave_file_list = Dir.foreach(slave_dir).select{|x| File.file?("#{master_dir}/#{x}")}
+          slave_file_list = Dir.foreach(slave_dir).select{|x| File.file?("#{slave_dir}/#{x}")}
           render json: {master_location: master_file_list, slave_location: slave_file_list}
         else
           render json: {status: "Folder Not Exitst"}

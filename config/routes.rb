@@ -28,7 +28,8 @@ Rails.application.routes.draw do
         post 'compare_reason', to: 'program_confs#compare_reason'
         get 'backup_file_list', to: 'program_confs#backup_file_list'
         get 'file_list' => 'program_confs#file_list'
-        post 'file_move', to: 'program_confs#file_move'      
+        post 'file_move', to: 'program_confs#file_move'
+        get 'file_receive_from_cnc', to: 'program_confs#file_receive_from_cnc'    
 
         get 'wifi_config', to: 'program_confs#wifi_config'
         get 'wifi_user_checking', to: 'program_confs#wifi_user_checking'
