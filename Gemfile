@@ -22,7 +22,9 @@ gem 'creek'
 gem 'roo'
 gem 'roo-xls'
 gem 'write_xlsx'
-
+gem 'sunspot_rails'
+gem 'wicked_pdf'
+gem 'wkhtmltopdf-binary'
 
 
 gem "paranoia", "~> 2.2"

@@ -16,6 +16,7 @@ Rails.application.routes.draw do
  # resources :break_times
  # resources :alarms
  #resources :error_masters
+ 
    namespace :api, defaults: {format: 'json'} do
       namespace :v1 do
       
@@ -29,12 +30,17 @@ Rails.application.routes.draw do
         get 'backup_file_list', to: 'program_confs#backup_file_list'
         get 'file_list' => 'program_confs#file_list'
         post 'file_move', to: 'program_confs#file_move'
-        get 'file_receive_from_cnc', to: 'program_confs#file_receive_from_cnc'    
+        get 'file_receive_from_cnc', to: 'program_confs#file_receive_from_cnc' 
+
+        post 'part_doc_upload', to: 'program_confs#part_doc_upload'   
 
         get 'wifi_config', to: 'program_confs#wifi_config'
         get 'wifi_user_checking', to: 'program_confs#wifi_user_checking'
         get 'wifi_name_list', to: 'program_confs#wifi_name_list'
         get 'file_send_to_cnc', to: 'program_confs#file_send_to_cnc'
+        get 'file_download1', to: 'program_confs#file_download1'
+        get 'part_doc_index', to: 'program_confs#part_doc_index'
+        put 'part_doc_edit', to:'program_confs#part_doc_edit'
         
         
         get 'ss', to: 'alarm_types#ss'
@@ -203,7 +209,7 @@ Rails.application.routes.draw do
         get 'file_path', to: 'program_confs#file_path'
         post 'compare_reason', to: 'program_confs#compare_reason'
         get 'backup_file_list', to: 'program_confs#backup_file_list'	
-	post 'file_upload' => 'program_confs#file_upload'
+	    post 'file_upload' => 'program_confs#file_upload'
         get 'file_list' => 'program_confs#file_list'
 
 	resources :part_documentations

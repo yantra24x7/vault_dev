@@ -48,15 +48,23 @@ class MachinesController < ApplicationController
 
   # POST /machines
   def create
+    
+    if params[:controller_type] == "RS232"
+      cc = Machine.where(controller_type: "RS232").count+1
+      link = "/dev/ttyS#{cc}"
+    end
+   
     @machine = Machine.new(machine_params)
-    if @machine.save
-      @set_alarm_setting = SetAlarmSetting.create!([{:alarm_for=>"idle", :machine_id=>@machine.id},{:alarm_for=>"stop", :machine_id=>@machine.id}])
-       @machine_setting = MachineSetting.create(is_active: true, machine_id: @machine.id)
-      @machine_setting_list = MachineSettingList.create(setting_name: "x_axis", machine_setting_id: @machine_setting.id)
-      @machine_setting_list = MachineSettingList.create(setting_name: "y_axis", machine_setting_id: @machine_setting.id)
-      @machine_setting_list = MachineSettingList.create(setting_name: "z_axis", machine_setting_id: @machine_setting.id)
-      @machine_setting_list = MachineSettingList.create(setting_name: "a_axis", machine_setting_id: @machine_setting.id)
-      @machine_setting_list = MachineSettingList.create(setting_name: "b_axis", machine_setting_id: @machine_setting.id)
+    @machine.link = link
+    if @machine.savehh
+
+      # @set_alarm_setting = SetAlarmSetting.create!([{:alarm_for=>"idle", :machine_id=>@machine.id},{:alarm_for=>"stop", :machine_id=>@machine.id}])
+      #  @machine_setting = MachineSetting.create(is_active: true, machine_id: @machine.id)
+      # @machine_setting_list = MachineSettingList.create(setting_name: "x_axis", machine_setting_id: @machine_setting.id)
+      # @machine_setting_list = MachineSettingList.create(setting_name: "y_axis", machine_setting_id: @machine_setting.id)
+      # @machine_setting_list = MachineSettingList.create(setting_name: "z_axis", machine_setting_id: @machine_setting.id)
+      # @machine_setting_list = MachineSettingList.create(setting_name: "a_axis", machine_setting_id: @machine_setting.id)
+      # @machine_setting_list = MachineSettingList.create(setting_name: "b_axis", machine_setting_id: @machine_setting.id)
      render json: @machine, status: :created#, location: @machine
     else
       render json: @machine.errors, status: :unprocessable_entity
@@ -85,7 +93,7 @@ class MachinesController < ApplicationController
     data=MachineDailyLog.dashboard_process(params)
     render json: data
   end
-
+  
   def dashboard_live
     
     data=MachineDailyLog.dashboard_process(params)
@@ -434,7 +442,7 @@ end
 
     # Only allow a trusted parameter "white list" through.
     def machine_params
-      params.require(:machine).permit(:machine_name, :machine_model, :machine_serial_no, :machine_type,:machine_ip, :tenant_id,:unit,:device_id, :controller_type)
+      params.require(:machine).permit(:machine_name, :machine_model, :machine_serial_no, :machine_type,:machine_ip, :tenant_id,:unit,:device_id, :controller_type, :border_rate, :t1_ip)
     end
 end
 end

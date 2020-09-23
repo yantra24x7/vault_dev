@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200423043632) do
+ActiveRecord::Schema.define(version: 20200827135325) do
 
   create_table "AlarmCodes_MachineSeriesNos", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "machine_series_no_id", null: false
@@ -284,16 +284,26 @@ ActiveRecord::Schema.define(version: 20200423043632) do
   end
 
   create_table "code_compare_reasons", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "part_number"
     t.string   "user_name"
     t.integer  "machine_id"
+    t.integer  "user_id"
+    t.string   "customername"
     t.string   "description"
+    t.datetime "edit_date"
+    t.string   "job_name"
+    t.string   "prog_num"
     t.datetime "create_date"
     t.string   "old_revision_no"
     t.string   "new_revision_no"
     t.string   "file_name"
+    t.string   "prg_file_path"
+    t.string   "part_doc_path"
+    t.boolean  "is_active"
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
     t.index ["machine_id"], name: "index_code_compare_reasons_on_machine_id", using: :btree
+    t.index ["user_id"], name: "index_code_compare_reasons_on_user_id", using: :btree
   end
 
   create_table "common_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -927,6 +937,9 @@ ActiveRecord::Schema.define(version: 20200423043632) do
     t.string   "machine_model"
     t.string   "machine_serial_no"
     t.string   "machine_type"
+    t.string   "link"
+    t.string   "t1_ip"
+    t.string   "border_rate"
     t.integer  "tenant_id"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
@@ -1635,6 +1648,7 @@ ActiveRecord::Schema.define(version: 20200423043632) do
   add_foreign_key "cncvendors", "cncoperations"
   add_foreign_key "cncvendors", "tenants"
   add_foreign_key "code_compare_reasons", "machines"
+  add_foreign_key "code_compare_reasons", "users"
   add_foreign_key "connection_logs", "tenants"
   add_foreign_key "consolidate_data", "machines"
   add_foreign_key "consummablemaintanances", "machines"

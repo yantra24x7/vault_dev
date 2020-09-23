@@ -1,4 +1,5 @@
 class CodeCompareReason < ApplicationRecord
+  mount_uploader :part_doc_path, FileUploader
   belongs_to :user
   belongs_to :machine
 
