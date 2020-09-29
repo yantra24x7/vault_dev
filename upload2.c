@@ -135,8 +135,8 @@ int main(int argc, char *argv[])
 	    else if(rc==-16)
 	      {
 		//printf("\n rc<%d>/<%s> ", rc, rc == EW_OK ?  "ok" : "flr");
-		  printf("\nMachine ip not vaild");
-		  sprintf(buf, "%s" , "Machine ip not vaild");
+		  printf("\nProgram download from cnc");
+		  sprintf(buf, "%s" , "Program download from cnc");
 		  file_write();
 		  //printf("File_written1\n");
 	      }

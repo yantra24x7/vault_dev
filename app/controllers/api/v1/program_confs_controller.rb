@@ -208,8 +208,8 @@ class ProgramConfsController < ApplicationController
         if master_file_list.include?(params[:file_name])
           mac_ip = machine.machine_ip
           
-          #dir = "/home/cnc/vault_dev"
-          dir = "/home/altius/YANTRA"
+          dir = "/home/cnc/vault_dev"
+          #dir = "/home/altius/YANTRA"
 
 
           File.open(File.join(dir, "machine_ip"), 'wb') do |file|
@@ -217,11 +217,27 @@ class ProgramConfsController < ApplicationController
             file.puts(mac_ip)
           end
              
-          #system('gcc -I. upload.c -pthread -lfwlib32 -lstdc++ -o upload')
-	        #system("./upload #{master_dir}/#{f_name}")
-          old_Rec = CodeCompareReason.find_by(part_number: f_name, machine_id: params[:machine_id], is_active: true)
-          reason = CodeCompareReason.create(part_number:f_name, user_id: current_user.id, user_name: current_user.first_name, machine_id: params[:machine_id], new_revision_no: old_Rec.new_revision_no, create_date: Time.now, old_revision_no: old_Rec.old_revision_no, description: "FILE UPLOADED TO CNC", file_name: old_Rec.file_name)         
-          render json: {status: "File upload sucessfully"}
+          
+	 if machine.controller_type == "Ethernet"
+
+	  system('gcc -I. upload.c -pthread -lfwlib32 -lstdc++ -o upload')
+	  system("./upload #{master_dir}/#{f_name}")
+	else
+          system("sudo socat pty,link =#{machine.link},raw tcp:#{machine.t1_ip}")
+	  system("sudo chmdo -R 777 #{machine.link}")
+	  system("gcc -std=c99 -std=gnu99 serial_upload.c -o serial_upload")
+	  system("./serial_upload #{machine.link} #{machine.border_rate} #{master_dir}/#{f_name}")
+
+	end
+ 
+   	msg = File.open('/home/cnc/vault_dev/Error.txt').read         
+
+          if msg == "Program transferred to CNC1"
+		od_Rec = CodeCompareReason.find_by(part_number: f_name, machine_id: params[:machine_id], is_active: true)
+        	reason = CodeCompareReason.create(part_number:f_name, user_id: current_user.id, user_name: current_user.first_name, machine_id: params[:machine_id], new_revision_no: old_Rec.new_revision_no, create_date: Time.now, old_revision_no: old_Rec.old_revision_no, description: "FILE UPLOADED TO CNC", file_name: old_Rec.file_name)         
+          end
+
+	 render json: {status: msg}
         else
           render json: {status: "File Not Exitst"}
         end
@@ -248,8 +264,8 @@ def file_receive_from_cnc
         if master_file_list.include?(params[:file_name])
           mac_ip = machine.machine_ip
           
-          #dir = "/home/cnc/vault_dev"
-          dir = "/home/altius/YANTRA"
+          dir = "/home/cnc/vault_dev"
+          #dir = "/home/altius/YANTRA"
 
           File.open(File.join(dir, "machine_ip"), 'wb') do |file|
             mac_ip = machine.machine_ip
@@ -257,13 +273,27 @@ def file_receive_from_cnc
           end
             d_file = f_name.split("O").last
 
-	         #system('gcc -I. download.c -pthread -lfwlib32 -lstdc++ -o download')
-           #system("./download #{slave_dir}/#{f_name} #{d_file}")
-           old_Rec = CodeCompareReason.find_by(part_number: f_name, machine_id: params[:machine_id], is_active: true)
-          reason = CodeCompareReason.create(part_number:f_name, user_id: current_user.id, user_name: current_user.first_name, machine_id: params[:machine_id], new_revision_no: old_Rec.new_revision_no, create_date: Time.now, old_revision_no: old_Rec.old_revision_no, description: "FILE DWONLOAD FROM CNC", file_name: old_Rec.file_name)
+	    if machine.controller_type == "Ethernet"
+	  	 #system('gcc -I. download.c -pthread -lfwlib32 -lstdc++ -o download')
+          	 #system("./download #{slave_dir}/#{f_name} #{d_file}")
+	  	 system('gcc -I. upload1.c -pthread -lfwlib32 -lstdc++ -o upload1')
+          	 system("./upload1 #{slave_dir}/#{f_name} #{d_file}")
+	    else
 
+                system("sudo socat pty,link =#{machine.link},raw tcp:#{machine.t1_ip}")
+	  	system("sudo chmdo -R 777 #{machine.link}")
+	  	system("gcc -std=c99 -std=gnu99 serial_upload.c -o serial_download")
+	  	system("./upload2 #{machine.link} #{machine.border_rate} #{master_dir}/#{f_name}")
+
+	    end
+
+           msg = File.open('/home/cnc/vault_dev/Error.txt').read	
+ 	if msg == "Program download from cnc1"
+	  old_Rec = CodeCompareReason.find_by(part_number: f_name, machine_id: params[:machine_id], is_active: true)
+          reason = CodeCompareReason.create(part_number:f_name, user_id: current_user.id, user_name: current_user.first_name, machine_id: params[:machine_id], new_revision_no: old_Rec.new_revision_no, create_date: Time.now, old_revision_no: old_Rec.old_revision_no, description: "FILE DWONLOAD FROM CNC", file_name: old_Rec.file_name)
+	end
          
-          render json: {status: "File download sucessfully"}
+          render json: {status: msg}
         else
           render json: {status: "File Not Exitst"}
         end

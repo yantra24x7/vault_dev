@@ -56,7 +56,7 @@ class MachinesController < ApplicationController
    
     @machine = Machine.new(machine_params)
     @machine.link = link
-    if @machine.savehh
+    if @machine.save
 
       # @set_alarm_setting = SetAlarmSetting.create!([{:alarm_for=>"idle", :machine_id=>@machine.id},{:alarm_for=>"stop", :machine_id=>@machine.id}])
       #  @machine_setting = MachineSetting.create(is_active: true, machine_id: @machine.id)
