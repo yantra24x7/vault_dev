@@ -32,7 +32,9 @@ Rails.application.routes.draw do
         post 'file_move', to: 'program_confs#file_move'
         get 'file_receive_from_cnc', to: 'program_confs#file_receive_from_cnc' 
 
-        post 'part_doc_upload', to: 'program_confs#part_doc_upload'   
+        post 'part_doc_upload', to: 'program_confs#part_doc_upload' 
+        get 'part_doc_download', to: 'program_confs#part_doc_download'   
+        get 'version_his',  to: 'program_confs#version_his' 
 
         get 'wifi_config', to: 'program_confs#wifi_config'
         get 'wifi_user_checking', to: 'program_confs#wifi_user_checking'
@@ -40,8 +42,9 @@ Rails.application.routes.draw do
         get 'file_send_to_cnc', to: 'program_confs#file_send_to_cnc'
         get 'file_download1', to: 'program_confs#file_download1'
         get 'part_doc_index', to: 'program_confs#part_doc_index'
-        put 'part_doc_edit', to:'program_confs#part_doc_edit'
+        post 'part_doc_edit', to:'program_confs#part_doc_edit'
         
+
         
         get 'ss', to: 'alarm_types#ss'
         post 'authenticate', to: 'authentication#authenticate'

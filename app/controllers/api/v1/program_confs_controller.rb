@@ -10,27 +10,43 @@ class ProgramConfsController < ApplicationController
   def index
     
     @machines= Tenant.find(params[:tenant_id]).machines.pluck(:id)#.select{|c| c.program_conf != nil}
+    # a = params
+    # find_by_sql [ "SELECT * FROM code_compare_reasons WHERE MATCH (part_number, user_name, customername, description, job_name, prog_num, old_revision_no, new_revision_no) AGAINST ('#{a}' IN NATURAL LANGUAGE MODE)" ]
      @program_confs = ProgramConf.where(machine_id: @machines)
     render json: @program_confs
   end
 
   def part_doc_index
-    if params["tenant_id"].present? && params["id"] == "ALL" || params["id"] == "undefined" && params["id"].present?
-      mac_ids = Machine.where(tenant_id: params["tenant_id"]).pluck(:id)
-      code_compare_reasons = CodeCompareReason.where(machine_id: mac_ids, is_active: true)
-      render json: code_compare_reasons
-    elsif params["id"] != "ALL" || params["id"] != "undefined" && params["id"].present?
-      code_compare_reasons = CodeCompareReason.where(machine_id: params[:id], is_active: true)
-      render json: code_compare_reasons
-    else
-      render json: {status: "Please Select the Machine"}
-    end
+    # if params["tenant_id"].present? && params["id"] == "ALL" || params["id"] == "undefined" && params["id"].present?
+    #   mac_ids = Machine.where(tenant_id: params["tenant_id"]).pluck(:id)
+    #   code_compare_reasons = CodeCompareReason.where(machine_id: mac_ids, is_active: true)
+    #   render json: code_compare_reasons
+    # elsif params["id"] != "ALL" || params["id"] != "undefined" && params["id"].present?
+    #   code_compare_reasons = CodeCompareReason.where(machine_id: params[:id], is_active: true)
+    #   render json: code_compare_reasons
+    # else
+    #   render json: {status: "Please Select the Machine"}
+    # end
+  
+     if params["id"].present? && params["search"].present?
+        rec = Machine.find(params[:id]).code_compare_reasons
+        reasons = CodeCompareReason.data_s(params)#.paginate(:page => page, :per_page => page_count)
+
+        result = reasons.select{|i| i.machine_id == params["id"].to_i && i.is_active == true}
+        rec = result.first(10)
+        render json: rec
+      elsif params["id"].present?
+        rec = Machine.find(params[:id]).code_compare_reasons.where(is_active: true).first(10)#.paginate(:page => page, :per_page => page_count)
+        render json: rec
+      else
+        render json: "ok"
+      end
   end
 
   def part_doc_edit
     @program_conf = CodeCompareReason.find(params[:id])
-   
-        if @program_conf.update(customername:params[:customername],job_name:params[:job_name])
+  
+        if @program_conf.update(customername:params[:customer_name],job_name:params[:job_name])
       render json: @program_conf
     else
       render json: @program_conf.errors, status: :unprocessable_entity
@@ -38,11 +54,61 @@ class ProgramConfsController < ApplicationController
 
   end
 
+  def part_doc_download
+    if CodeCompareReason.find(params[:id]).part_doc_path.present?
+      
+
+      rec = CodeCompareReason.find(params[:id])#["part_doc_path"]
+      f_name = rec["part_doc_path"]
+     url = rec.part_doc_path.url
+#byebug
+      # File.open(f_name, 'wb'){|f| f << url}
+      send_file(
+    url,
+    filename: "#{f_name}.pdf",
+    type: "application/pdf"
+  )
+    
+   # send_file("/home/altius/YANTRA/part_program/Document/LMW/log.pdf")
+
+  #  send_file(File.join(url), "uma.pdf")
+
+
+   #  send_file url, :type=>"application/pdf", :x_sendfile=>true
+
+
+#IMAGES_PATH = File.join(Rails.root, "public", "images")
+
+#def download
+#  send_file(File.join(IMAGES_PATH, "image.jpg"))
+#end
+
+
+
+  
+
+    else
+      render json: {status: "File Not Exitst"}
+    end
+    # byebug
+    # backup_file = backup_dir.join(file_name)
+    # File.open(file_name, 'wb'){|f| f << backup_file}
+    # send_file(backup_file, :filename => file_name)
+  
+  end
+
+  def version_his
+     res = CodeCompareReason.find(params[:id]).machine.code_compare_reasons.where(file_name: params[:file_name])
+   render json: res
+    end
+
   def part_doc_upload
     code_compare_reason = CodeCompareReason.find(params[:id])
     code_compare_reason.update(part_doc_path: params[:file])
-    render json: "ok"
+    render json: {status: "File Upload Successfully"}
   end
+
+
   def file_download1 
      data = CodeCompareReason.find(params[:id])#.part_doc_path.url
     url = data.part_doc_path.url
@@ -208,8 +274,8 @@ class ProgramConfsController < ApplicationController
         if master_file_list.include?(params[:file_name])
           mac_ip = machine.machine_ip
           
-          dir = "/home/cnc/vault_dev"
-          #dir = "/home/altius/YANTRA"
+          #dir = "/home/cnc/vault_dev"
+          dir = "/home/altius/YANTRA"
 
 
           File.open(File.join(dir, "machine_ip"), 'wb') do |file|
@@ -230,9 +296,10 @@ class ProgramConfsController < ApplicationController
 
 	end
  
-   	msg = File.open('/home/cnc/vault_dev/Error.txt').read         
+   #	msg = File.open('/home/cnc/vault_dev/Error.txt').read  
+    msg = File.open('/home/altius/YANTRA/Error.txt').read       
 
-          if msg == "Program transferred to CNC1"
+          unless msg == "Program transferred to CNC1"
 		od_Rec = CodeCompareReason.find_by(part_number: f_name, machine_id: params[:machine_id], is_active: true)
         	reason = CodeCompareReason.create(part_number:f_name, user_id: current_user.id, user_name: current_user.first_name, machine_id: params[:machine_id], new_revision_no: old_Rec.new_revision_no, create_date: Time.now, old_revision_no: old_Rec.old_revision_no, description: "FILE UPLOADED TO CNC", file_name: old_Rec.file_name)         
           end
@@ -264,8 +331,8 @@ def file_receive_from_cnc
         if master_file_list.include?(params[:file_name])
           mac_ip = machine.machine_ip
           
-          dir = "/home/cnc/vault_dev"
-          #dir = "/home/altius/YANTRA"
+          #dir = "/home/cnc/vault_dev"
+          dir = "/home/altius/YANTRA"
 
           File.open(File.join(dir, "machine_ip"), 'wb') do |file|
             mac_ip = machine.machine_ip
@@ -287,8 +354,11 @@ def file_receive_from_cnc
 
 	    end
 
-           msg = File.open('/home/cnc/vault_dev/Error.txt').read	
- 	if msg == "Program download from cnc1"
+          # msg = File.open('/home/cnc/vault_dev/Error.txt').read	
+          msg = File.open('/home/altius/YANTRA/Error.txt').read 
+ 
+ #	if msg == "Program download from cnc1"
+ unless msg == "1"
 	  old_Rec = CodeCompareReason.find_by(part_number: f_name, machine_id: params[:machine_id], is_active: true)
           reason = CodeCompareReason.create(part_number:f_name, user_id: current_user.id, user_name: current_user.first_name, machine_id: params[:machine_id], new_revision_no: old_Rec.new_revision_no, create_date: Time.now, old_revision_no: old_Rec.old_revision_no, description: "FILE DWONLOAD FROM CNC", file_name: old_Rec.file_name)
 	end

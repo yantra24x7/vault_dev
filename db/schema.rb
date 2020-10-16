@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200827135325) do
+ActiveRecord::Schema.define(version: 20200928031723) do
 
   create_table "AlarmCodes_MachineSeriesNos", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "machine_series_no_id", null: false
@@ -303,6 +303,7 @@ ActiveRecord::Schema.define(version: 20200827135325) do
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
     t.index ["machine_id"], name: "index_code_compare_reasons_on_machine_id", using: :btree
+    t.index ["part_number", "user_name", "customername", "description", "job_name", "prog_num", "old_revision_no", "new_revision_no"], name: "search_name_description", type: :fulltext
     t.index ["user_id"], name: "index_code_compare_reasons_on_user_id", using: :btree
   end
 

@@ -46,6 +46,7 @@ has_one :planstatus
 has_many :dashboard_lives
 has_many :dashboard_data
 has_one :machine_setting
+has_many :code_compare_reasons
 
 
   # def self.alert_mail # For continues data loss from Raspery Pi

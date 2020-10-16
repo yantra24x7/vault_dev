@@ -2,21 +2,42 @@ module Api
   module V1
     class CodeCompareReasonsController < ApplicationController
       before_action :set_code_compare_reason, only: [:show, :update, :destroy]
-      skip_before_action :authenticate_request, only: %i[index]
+      #skip_before_action :authenticate_request, only: %i[index]
 
       # GET /code_compare_reasons
-      def index
-	if params["tenant_id"].present? && params["id"] == "ALL" || params["id"] == "undefined" && params["id"].present?
-	  mac_ids = Machine.where(tenant_id: params["tenant_id"]).pluck(:id)
-	  code_compare_reasons = CodeCompareReason.where(machine_id: mac_ids)
-	  render json: code_compare_reasons
-        elsif params["id"] != "ALL" || params["id"] != "undefined" && params["id"].present?
-          code_compare_reasons = CodeCompareReason.where(machine_id: params[:id])
-          render json: code_compare_reasons
-        else
-          render json: {status: "Please Select the Machine"}
-        end
+    def index
+      page = params[:page].present? ? params[:page] : 1
+      page_count = params[:per_page].present? ? params[:per_page] : 10
+      if params["id"].present? && params["search"].present?
+        rec = Machine.find(params[:id]).code_compare_reasons
+        reasons = CodeCompareReason.data_s(params)#.paginate(:page => page, :per_page => page_count)
+        result = reasons.select{|i| i.machine_id == params["id"].to_i}
+        rec = result.first(10)
+        render json: rec
+      elsif params["id"].present?
+        rec = Machine.find(params[:id]).code_compare_reasons.first(10)#.paginate(:page => page, :per_page => page_count)
+        render json: rec
+      else
+        render json: "ok"
       end
+    end
+
+    def part_doc_search
+      page = params[:page].present? ? params[:page] : 1
+      page_count = params[:per_page].present? ? params[:per_page] : 10
+      if params["id"].present? && params["search"].present?
+        rec = Machine.find(params[:id]).code_compare_reasons
+        reasons = CodeCompareReason.data_s(params)#.paginate(:page => page, :per_page => page_count)
+        result = reasons.select{|i| i.machine_id == params["id"].to_i}
+        rec = result.first(10)
+        render json: rec
+      elsif params["id"].present?
+        rec = Machine.find(params[:id]).code_compare_reasons.first(10)#.paginate(:page => page, :per_page => page_count)
+        render json: rec
+      else
+        render json: "ok"
+      end
+    end
 
       # GET /code_compare_reasons/1
       def show

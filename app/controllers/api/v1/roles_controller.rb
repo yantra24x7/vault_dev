@@ -7,7 +7,8 @@ class RolesController < ApplicationController
   # GET /roles
   def index
    # @roles = Tenant.find(params[:tenant_id]).roles.where.not(role_name:"CEO")
-    @roles = Role.where.not(role_name:"CEO").pluck(:role_name).uniq
+
+    @roles = Role.where(tenant_id:current_user.tenant.id)#.pluck(:role_name).uniq
     render json: @roles
   end
 
@@ -24,6 +25,7 @@ class RolesController < ApplicationController
   # POST /roles
   def create
     @role = Role.new(role_params)
+    
     if @role.save
       render json: @role, status: :created#, location: @role
     else

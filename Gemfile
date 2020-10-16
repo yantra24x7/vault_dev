@@ -24,7 +24,7 @@ gem 'roo-xls'
 gem 'write_xlsx'
 gem 'sunspot_rails'
 gem 'wicked_pdf'
-gem 'wkhtmltopdf-binary'
+#gem 'wkhtmltopdf-binary'
 
 
 gem "paranoia", "~> 2.2"
@@ -45,7 +45,9 @@ gem 'spreadsheet'
 gem 'axlsx_rails'
 gem 'zip-zip'
 
+
 gem 'delayed_job_active_record'
+gem 'will_paginate', '~> 3.1.0'
 
 #gem 'delayed_job_mongoid'
 # gem 'spreadsheet'
